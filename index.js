@@ -1,6 +1,6 @@
 import 'dotenv/config'; 
-const express = require('express');
-const cors = require('cors');
+import cors from "cors";
+import express from "express";
 const loblawRoutes = require('./routes/loblaw');
 
 const app = express();
