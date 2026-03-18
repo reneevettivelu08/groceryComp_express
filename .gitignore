@@ -1,2 +1,7 @@
+node_modules/
 .env
-node_modules
+dist/
+.DS_Store
+*.log
+.cache/
+.puppeteer_cache/
