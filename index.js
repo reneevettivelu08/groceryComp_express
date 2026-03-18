@@ -1,7 +1,7 @@
 import 'dotenv/config'; 
 import cors from "cors";
 import express from "express";
-const loblawRoutes = require('./routes/loblaw');
+import loblawRoutes from "./routes/loblaw.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
