@@ -1,21 +1,21 @@
-import 'dotenv/config'; 
-import cors from "cors";
-import express from "express";
-import loblawRoutes from "./routes/loblaw.js";
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const loblawRoutes = require('./routes/loblaw');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// -----------------------------------------------
-// Middleware
-// -----------------------------------------------
 app.use(express.json());
 
-// Allow requests from the React dev server and Netlify
+// In production, allow the Netlify origin.
+// In development, allow localhost.
+// If CLIENT_URL isn't set, fall back to allowing all origins so the
+// server never crashes with a CORS error during initial setup.
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  process.env.CLIENT_URL, // set this in production .env
+  process.env.CLIENT_URL,
 ].filter(Boolean);
 
 app.use(cors({
@@ -34,21 +34,15 @@ app.use(cors({
   }
 }));
 
-// -----------------------------------------------
-// Routes
-// -----------------------------------------------
 app.use('/api/loblaw', loblawRoutes);
 
-// Health check — Heroku and Netlify use this
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// -----------------------------------------------
-// Start
-// -----------------------------------------------
 app.listen(PORT, () => {
   console.log(`\n🥦 groceryComp server running on http://localhost:${PORT}`);
-  console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   Loblaw API key: ${process.env.LOBLAW_API_KEY ? '✓ set' : '✗ MISSING — check .env'}\n`);
+  console.log(`   NODE_ENV : ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   API key  : ${process.env.LOBLAW_API_KEY ? '✓ set' : '✗ MISSING'}`);
+  console.log(`   CORS     : ${allowedOrigins.join(', ') || 'all origins (no CLIENT_URL set)'}\n`);
 });
