@@ -20,10 +20,17 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (curl, Postman, server-to-server)
+    // No origin = curl / Postman / server-to-server — always allow
     if (!origin) return callback(null, true);
+    // Known origin — allow
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: origin ${origin} not allowed`));
+    // Unknown origin in production — log and reject cleanly (no crash)
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(`CORS blocked: ${origin}`);
+      return callback(null, false);
+    }
+    // In development allow everything so local testing is easy
+    return callback(null, true);
   }
 }));
 

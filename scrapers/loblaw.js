@@ -38,20 +38,32 @@ async function getBrowser() {
 
   const isProduction = process.env.NODE_ENV === 'production';
 
+  // Production (Heroku) needs different flags than local dev.
+  // --single-process crashes on Heroku's container — remove it in prod.
+  // --no-zygote also conflicts with Heroku — only use in dev.
+  const productionArgs = [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-accelerated-2d-canvas',
+    '--no-first-run',
+    '--disable-gpu',
+    '--disable-extensions',
+    '--disable-background-networking',
+    '--disable-default-apps',
+    '--mute-audio',
+    '--window-size=1280,720',
+  ];
+
+  const developmentArgs = [
+    ...productionArgs,
+    '--no-zygote',
+    '--single-process',
+  ];
+
   browserInstance = await puppeteer.launch({
     headless: isProduction ? true : 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu',
-      '--disable-extensions',
-      '--mute-audio',
-    ],
+    args: isProduction ? productionArgs : developmentArgs,
     ...(process.env.PUPPETEER_EXECUTABLE_PATH && {
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     }),
