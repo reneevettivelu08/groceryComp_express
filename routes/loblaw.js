@@ -112,14 +112,18 @@ router.get('/search', async (req, res) => {
   }
 
   const cacheKey = `search:${banner}:${storeId || 'default'}:${normalizedTerm}`;
-  const cached   = cache.get(cacheKey);
-  if (cached) {
+  const cached = cache.get(cacheKey);
+  // Only serve from cache if it actually has results — never cache empty arrays
+  if (cached && cached.length > 0) {
     return res.json({ results: cached, fromCache: true });
   }
 
   try {
     const results = await getProducts(codes, banner, storeId);
-    cache.set(cacheKey, results);
+    // Only cache if we got actual results — prevents stale empty arrays
+    if (results.length > 0) {
+      cache.set(cacheKey, results);
+    }
     res.json({ results, fromCache: false });
   } catch (err) {
     console.error('Search error:', err.message);
